@@ -1,0 +1,23 @@
+# 1. Xây dựng API
+fastapi # framework web để xây dựng api bằng python
+# FastAPI cần một server để chạy
+# Một máy chủ ASGI (Asynchronous Server Gateway Interface)
+uvicorn
+# Thư viện hỗ trợ đọc request dạng multipart/form-data
+python-multipart
+
+# 2. Nhóm Xử lý Hình ảnh & Dữ liệu
+# Thư viện toán học xử lý mảng (array) và ma trận
+numpy
+# Phiên bản "nhẹ" của OpenCV - thư viện xử lý ảnh
+opencv-python-headless
+
+# 3. Nhóm AI & Nhận diện Khuôn mặt
+# Một thư viện mã nguồn mở rất mạnh mẽ chuyên về phân tích khuôn mặt 2D và 3D.
+# Nó cung cấp các mô hình (models) đã được huấn luyện sẵn (pretrained) để:
+# + Phát hiện khuôn mặt (Face Detection - xem ảnh có mặt người không).
+# + Trích xuất đặc trưng (Face Embedding/Recognition - biến khuôn mặt thành vector số để so sánh).
+# + Xác định giới tính, độ tuổi, các điểm mốc trên mặt (Landmarks).
+insightface
+# Một công cụ (Inference Engine) để chạy các mô hình máy học định dạng ONNX.
+onnxruntime-gpu  
