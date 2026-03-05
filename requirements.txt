@@ -12,6 +12,9 @@ numpy
 # Phiên bản "nhẹ" của OpenCV - thư viện xử lý ảnh
 opencv-python-headless
 
+# tạo Http request
+requests
+
 # 3. Nhóm AI & Nhận diện Khuôn mặt
 # Một thư viện mã nguồn mở rất mạnh mẽ chuyên về phân tích khuôn mặt 2D và 3D.
 # Nó cung cấp các mô hình (models) đã được huấn luyện sẵn (pretrained) để:

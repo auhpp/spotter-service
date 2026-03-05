@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
+import requests
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from insightface.app import FaceAnalysis
+from pydantic import BaseModel
 import uvicorn
 
 app = FastAPI()
@@ -77,6 +79,43 @@ async def extract_user_face(file: UploadFile = File(...)):
         }
     except Exception as e:
          raise HTTPException(status_code=500, detail=str(e))
+
+class ImageUrlRequest(BaseModel):
+    url: str
+
+@app.post("/extract-faces-by-url")
+async def extract_faces_by_url(request: ImageUrlRequest):
+    """
+    API nhận URL ảnh (từ Cloudinary), tự động tải và trích xuất khuôn mặt.
+    """
+    try:
+        # 1. Tải ảnh từ Cloudinary URL
+        response = requests.get(request.url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Cannot download image from URL")
+
+        # 2. Chuyển đổi content tải về thành numpy array và giải mã bằng OpenCV
+        nparr = np.frombuffer(response.content, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        if img is None:
+            raise HTTPException(status_code=400, detail="Invalid image file")
+
+        # 3. Chạy AI detect
+        faces = ai_model.get(img)
+        
+        results = []
+        for face in faces:
+            results.append({
+                "embedding": face.embedding.tolist(),
+                "bbox": face.bbox.astype(int).tolist(),
+                "det_score": float(face.det_score)
+            })
+            
+        return {"code": 200, "status": "success", "faces": results}
+
+    except Exception as e:
+        return {"code": 500, "status": "error", "message": str(e)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
