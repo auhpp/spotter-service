@@ -18,37 +18,6 @@ ai_model = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider'])
 # 640x640 là chuẩn cân bằng giữa tốc độ và độ chính xác.
 ai_model.prepare(ctx_id=0, det_size=(640, 640))
 
-@app.post("/extract-faces")
-async def extract_faces(file: UploadFile = File(...)):
-    """
-    API dùng cho Admin upload ảnh sự kiện.
-    Trả về danh sách tất cả các mặt trong ảnh.
-    """
-    try:
-        # Đọc ảnh từ request
-        contents = await file.read()               # 1. Đọc file upload dưới dạng bytes
-        nparr = np.frombuffer(contents, np.uint8)  # 2. Chuyển bytes thành mảng số nguyên (numpy array)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR) # 3. Dùng OpenCV giải mã mảng đó thành ma trận ảnh (BGR)
-
-        if img is None:
-            raise HTTPException(status_code=400, detail="Invalid image file")
-
-        # Chạy AI detect
-        faces = ai_model.get(img)
-        
-        results = []
-        for face in faces:
-            results.append({
-                "embedding": face.embedding.tolist(), # Vector 512 chiều đại diện cho khuôn mặt
-                "bbox": face.bbox.astype(int).tolist(), # [x1, y1, x2, y2]: để vẽ khung hình chữ nhật quanh mặt 
-                "det_score": float(face.det_score) # Độ tin cậy (ví dụ: 0.98 nghĩa là AI chắc chắn 98% đó là mặt người)
-            })
-            
-        return {"code": 200, "status": "success", "faces": results}
-
-    except Exception as e:
-        return {"code": 500, "status": "error", "message": str(e)}
-
 @app.post("/extract-user-face")
 async def extract_user_face(file: UploadFile = File(...)):
     """
@@ -107,9 +76,9 @@ async def extract_faces_by_url(request: ImageUrlRequest):
         results = []
         for face in faces:
             results.append({
-                "embedding": face.embedding.tolist(),
-                "bbox": face.bbox.astype(int).tolist(),
-                "det_score": float(face.det_score)
+                "embedding": face.embedding.tolist(),  # Vector 512 chiều đại diện cho khuôn mặt
+                "bbox": face.bbox.astype(int).tolist(), # [x1, y1, x2, y2]: để vẽ khung hình chữ nhật quanh mặt 
+                "det_score": float(face.det_score) # # Độ tin cậy (ví dụ: 0.98 nghĩa là AI chắc chắn 98% đó là mặt người)
             })
             
         return {"code": 200, "status": "success", "faces": results}
