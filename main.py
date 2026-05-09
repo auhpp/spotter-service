@@ -11,12 +11,12 @@ app = FastAPI()
 # 1. Khởi tạo Model (Chạy lần đầu sẽ tự tải model buffalo_l về)
 # 'buffalo_l' là gói model lớn (Large) bao gồm cả detect (tìm mặt) và recognize (nhận diện).
 # providers=['CUDAExecutionProvider']: Cấu hình chạy trên GPU NVIDIA.
-ai_model = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider'])
+ai_model = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
 
 # ctx_id=0: Sử dụng GPU số 0. Nếu chạy CPU thì tham số này bị bỏ qua hoặc đặt < 0.
 # det_size=(640, 640): Kích thước ảnh đầu vào được resize trước khi detect.
 # 640x640 là chuẩn cân bằng giữa tốc độ và độ chính xác.
-ai_model.prepare(ctx_id=0, det_size=(640, 640))
+ai_model.prepare(ctx_id=-1, det_size=(640, 640))
 
 @app.post("/extract-user-face")
 async def extract_user_face(file: UploadFile = File(...)):
@@ -44,7 +44,6 @@ async def extract_user_face(file: UploadFile = File(...)):
             "code": 200,
             "status": "success",
             "embedding": target_face.embedding.tolist(),
-            "det_score": float(target_face.det_score)
         }
     except Exception as e:
          raise HTTPException(status_code=500, detail=str(e))
@@ -77,8 +76,6 @@ async def extract_faces_by_url(request: ImageUrlRequest):
         for face in faces:
             results.append({
                 "embedding": face.embedding.tolist(),  # Vector 512 chiều đại diện cho khuôn mặt
-                "bbox": face.bbox.astype(int).tolist(), # [x1, y1, x2, y2]: để vẽ khung hình chữ nhật quanh mặt 
-                "det_score": float(face.det_score) # # Độ tin cậy (ví dụ: 0.98 nghĩa là AI chắc chắn 98% đó là mặt người)
             })
             
         return {"code": 200, "status": "success", "faces": results}
